@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<HTML>
+<HEAD>     
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Test XHRMeasure</title>
+    <script src="xhrm.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <style>
+    body {
+    	font-family: Arial;
+    }
+    
+    div#errors {
+        font-family: courier;
+    	font-size: 13px;
+    	display: block;
+    	height: 300px;
+    	overflow-y:scroll;
+    	margin-bottom: 20px;
+    }
+    
+    div#stats {
+    	font-family: courier;
+    	font-size: 13px;
+    	display: block;
+    	height: 300px;
+    	overflow-y:scroll;
+    	margin-bottom: 20px;
+    }
+    
+    </style>
+</HEAD>
+<BODY>
+<script>
+
+try {
+	XHRM.init();
+}
+catch(err) {
+    document.getElementById("errors").innerHTML = err.message;
+}
+
+function makeJQXHRCall() {
+	jQuery.ajax('http://test.nerv.home/sleep.php');
+	//jQuery.ajax('http://test.nerv.home/plants.xml');
+}
+
+function printStats() {
+	sample = popMetricsSample()
+	if(sample){
+		var statsDiv = document.getElementById('stats');
+		statsDiv.innerHTML = statsDiv.innerHTML + line(sample);
+	}
+	var statsDiv = document.getElementById("stats");
+	statsDiv.scrollTop = statsDiv.scrollHeight;
+}
+
+function line(sample) {
+	ct = sample['connect'] - sample['start'];
+	rt = sample['received'] - sample['connect'];
+	tt = sample['processing'] - sample['received'];
+	pt = sample['ready'] - sample['processing'];
+	
+	return b(sample['status']) + " " + b(sample['text']) + " " + ct + "ms " + rt + "ms " + tt + "ms " + pt+"ms " + b(sample['total']+"ms") + " " + sample['size']+"bytes" + " " + sample['url'] + " " + "</br>";
+}
+
+
+function b(a) {
+	return 	"<b>"+a+"</b>";
+}
+
+function popMetricsSample() {
+	for (var key in XHRM.log) {
+		if (XHRM.log[key]['complete'] == true) { 
+			var sample = jQuery.extend(true, {}, XHRM.log[key])
+			delete XHRM.log[key];
+			return sample;
+		}
+	}
+}
+
+var XHLloopHandle = setInterval(makeJQXHRCall, 1000);
+var printStatsLoopHandle = setInterval(printStats, 400);
+</script>
+
+
+<h4>XHR Log</h4>
+<div id="stats"></div>
+
+<h4>Errors</h4>
+<div id="errors"></div>
+
+</BODY>
+</HTML>
