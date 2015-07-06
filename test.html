@@ -42,8 +42,11 @@ catch(err) {
 }
 
 function makeJQXHRCall() {
-	jQuery.ajax('http://test.nerv.home/sleep.php');
-	//jQuery.ajax('http://test.nerv.home/plants.xml');
+	xhrurlObj = document.getElementById("xhrurl");
+	if(xhrurlObj.value) {
+		jQuery.ajax(xhrurlObj.value);
+		//jQuery.ajax('http://test.nerv.home/plants.xml');
+	}
 }
 
 function printStats() {
@@ -83,6 +86,9 @@ function popMetricsSample() {
 var XHLloopHandle = setInterval(makeJQXHRCall, 1000);
 var printStatsLoopHandle = setInterval(printStats, 400);
 </script>
+
+
+<label>Provide a URL: </label><input type="text" size="50" id="xhrurl" value="sleep.php"></input>
 
 
 <h4>XHR Log</h4>
