@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <HTML>
 <HEAD>     
@@ -6,9 +5,14 @@
     <title>Test XHRMeasure</title>
     <script src="xhrm.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.4.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.4.0/vis.min.css" rel="stylesheet" type="text/css" />
     <style>
     body {
     	font-family: Arial;
+    }
+    
+    div#visualization {
     }
     
     div#errors {
@@ -17,7 +21,7 @@
         font-family: courier;
     	font-size: 13px;
     	display: block;
-    	height: 300px;
+    	height: 100px;
     	overflow-y:scroll;
     	margin-bottom: 20px;
     }
@@ -28,7 +32,7 @@
     	font-family: courier;
     	font-size: 13px;
     	display: block;
-    	height: 300px;
+    	height: 200px;
     	overflow-y:scroll;
     	margin-bottom: 20px;
     }
@@ -37,14 +41,6 @@
 </HEAD>
 <BODY>
 <script>
-
-try {
-	XHRM.init();
-}
-catch(err) {
-    document.getElementById("errors").innerHTML = err.message;
-}
-
 function makeJQXHRCall() {
 	xhrurlObj = document.getElementById("xhrurl");
 	if(xhrurlObj.value) {
@@ -54,10 +50,14 @@ function makeJQXHRCall() {
 }
 
 function printStats() {
+	// take sample from JS object that contains samples
 	sample = popMetricsSample()
 	if(sample){
+		// print log and add a data point in the graph
 		var statsDiv = document.getElementById('stats');
 		statsDiv.innerHTML = statsDiv.innerHTML + line(sample);
+		addDataPoint(sample['total']);
+		delete sample;
 	}
 	var statsDiv = document.getElementById("stats");
 	statsDiv.scrollTop = statsDiv.scrollHeight;
@@ -69,9 +69,8 @@ function line(sample) {
 	tt = sample['processing'] - sample['received'];
 	pt = sample['ready'] - sample['processing'];
 	
-	return b(sample['status']) + " " + b(sample['text']) + " " + ct + "ms " + rt + "ms " + tt + "ms " + pt+"ms " + b(sample['total']+"ms") + " " + sample['size']+"bytes" + " " + sample['url'] + " " + "</br>";
+	return b(sample['status']) + " " + b(sample['text']) + " " + ct + "ms " + rt + "ms " + tt + "ms " + pt + "ms " + b(sample['total']+"ms") + " " + sample['size']+"bytes" + " " + sample['url'] + " " + "</br>";
 }
-
 
 function b(a) {
 	return 	"<b>"+a+"</b>";
@@ -86,20 +85,98 @@ function popMetricsSample() {
 		}
 	}
 }
-
-var XHLloopHandle = setInterval(makeJQXHRCall, 1000);
-var printStatsLoopHandle = setInterval(printStats, 400);
 </script>
-
 
 <label>Provide a URL: </label><input type="text" size="50" id="xhrurl" value="sleep.php"></input>
 
+<h4>Performance</h4>
+
+<script type="text/javascript">
+// Partial example from the VisJS example pages
+
+function renderStep() {
+	var now = vis.moment();
+	var range = graph2d.getWindow();
+	var interval = range.end - range.start;
+	graph2d.setWindow(now - interval, now, {
+		animation : false
+	});
+	setTimeout(renderStep, DELAY);
+}
+
+function addDataPoint(millies) {
+	// add a new data point to the dataset
+	var now = vis.moment();
+	dataset.add({
+		x : now,
+		y : millies
+	});
+
+	// remove all data points which are no longer visible
+	var range = graph2d.getWindow();
+	var interval = range.end - range.start;
+	var oldIds = dataset.getIds({
+		filter : function(item) {
+			return item.x < range.start - interval;
+		}
+	});
+	dataset.remove(oldIds);
+}
+</script>
+
+<div id="visualization"></div>
 
 <h4>XHR Log</h4>
 <div id="stats"></div>
 
 <h4>Errors</h4>
 <div id="errors"></div>
+
+<script>
+
+var DELAY = 1000;
+var container = document.getElementById('visualization');
+var dataset = new vis.DataSet();
+var options = {
+	start : vis.moment().add(-30, 'seconds'), // changed so its faster
+	end : vis.moment(),
+	dataAxis : {
+		left : {
+			range : {
+				min : 0,
+				max : 1000
+			}
+		}
+	},
+	drawPoints : {
+		style : 'square' // square, circle
+	},
+	shaded : {
+		orientation : 'bottom' // top, bottom
+	},
+    width:  '100%',
+    height: '200px',
+};
+var graph2d = new vis.Graph2d(container, dataset, options);
+
+
+// start up when page is loaded
+document.body.onload = function () {
+
+	try {
+		XHRM.init();
+	} catch(err) {
+	    document.getElementById("errors").innerHTML = err.message;
+	}
+	
+	renderStep();
+
+	var XHLloopHandle = setInterval(makeJQXHRCall, 1000);
+	var printStatsLoopHandle = setInterval(printStats, 400);
+	
+}
+</script>
+
 
 </BODY>
 </HTML>

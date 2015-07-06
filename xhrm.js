@@ -2,16 +2,15 @@ var XHRM = {
 	counter	: 0,
 	log : {},
 	init: function () {
+		// initialiazation function
 		if(typeof XMLHttpRequest != "undefined") {
 			this.xhrattach(XMLHttpRequest.prototype.open);
 		}
 	},
 	xhrattach: function (open) {
-		
+		// wrap the prototype.open method in our own method 
 		XMLHttpRequest.prototype.open = function(method, url, async, user, pass) {
-			//console.info("prototype.open here");
 			XHRM.counter++;
-			//console.info("xhr counter: " + XHRM.counter);
 			if(typeof this.addEventListener == "function") {
 				try {
 		    		this.tempMetrics = XHRM.log;
@@ -34,11 +33,10 @@ var XHRM = {
 			    	this.tempMetrics[XHRM.counter]['url'] = url;
 			    	this.tempMetrics[XHRM.counter]['method'] = method;
 			    	this.tempMetrics[XHRM.counter]['async'] = async;
-			    	this.tempMetrics[XHRM.counter]['start'] = new Date().getTime();;
-		    		//console.info("trying to attach event...");
-
+			    	this.tempMetrics[XHRM.counter]['start'] = new Date().getTime();
+			    	
+			    	// add an Event handler for every readystatechange event
 		    		this.addEventListener("readystatechange", function () {
-			    		//console.info("tracer here");
 			    		switch(this.readyState)
 			        	{
 			        		case 0:
@@ -65,16 +63,12 @@ var XHRM = {
 			        	}
 			        	
 			    	}, false);
-					//console.info("stopped");
 				}
 	        	catch(err) {
 	        	    document.getElementById("errors").innerHTML = err.message;
 	        	}
 	        }
-
 	    	return open.apply(this, [method, url, async, user, pass]);
 	    };
-	
-	
 	}
 };
