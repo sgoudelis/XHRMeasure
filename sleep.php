@@ -1,4 +1,4 @@
 <?php 
-usleep(500000);
+usleep(rand(10000, 800000));
 print "hello world!";
 ?>
