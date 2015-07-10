@@ -10,4 +10,4 @@ This small piece of code wraps the XmlHttpRequest object methods with code that 
 
 ## Licence
 
-mybitbank is a free software distributed under the terms of the MIT license
+XHRMeasure is a free software distributed under the terms of the MIT license
