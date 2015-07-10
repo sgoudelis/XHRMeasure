@@ -6,3 +6,7 @@ This small piece of code wraps the XmlHttpRequest object methods with code that 
 
 #### Screenshot
 ![Alt text](/doc/XHRM.jpg "Main")
+
+## Licence
+
+mybitbank is a free software distributed under the terms of the MIT license
