@@ -8,6 +8,11 @@ This small piece of code wraps the XmlHttpRequest object methods with code that 
 #### Screenshot
 ![Alt text](/doc/XHRM.jpg "Main")
 
+#### Live demo
+```
+http://52.28.28.50/xhrmeasure/test.html
+```
+
 ## Licence
 
 XHRMeasure is a free software distributed under the terms of the MIT license
