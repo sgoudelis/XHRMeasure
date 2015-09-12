@@ -2,7 +2,7 @@ var XHRM = {
 	counter	: 0,
 	log : {},
 	init: function () {
-		// initialiazation function
+		// initialization function
 		if(typeof XMLHttpRequest != "undefined") {
 			this.xhrattach(XMLHttpRequest.prototype.open);
 		}
